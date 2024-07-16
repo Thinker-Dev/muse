@@ -25,6 +25,7 @@ const ActionButton = ({
   const pathname = usePathname()
 
   const onSendDiscordMessage = useCallback(async () => {
+    console.log(nodeConnection.discordNode)
     const response = await postContentToWebHook(
       nodeConnection.discordNode.content,
       nodeConnection.discordNode.webhookURL
@@ -77,6 +78,7 @@ const ActionButton = ({
 
   const onCreateLocalNodeTempate = useCallback(async () => {
     if (currentService === 'Discord') {
+
       const response = await onCreateNodeTemplate(
         nodeConnection.discordNode.content,
         currentService,

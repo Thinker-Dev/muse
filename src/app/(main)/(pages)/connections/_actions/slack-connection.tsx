@@ -1,6 +1,8 @@
 'use server'
 
 import { Option } from '@/components/ui/multiple-selector'
+import { SLACK_CONNECTION_MUTATION_ON_CONNECTION, SLACK_CONNECTION_QUERY_CONNECTION } from '@/graphql/queries/slack'
+import { getClient } from '@/lib/data/graphql/client'
 import { db } from '@/lib/db'
 import { currentUser } from '@clerk/nextjs'
 import axios from 'axios'
@@ -16,37 +18,37 @@ export const onSlackConnect = async (
   user_id: string
 ): Promise<void> => {
   if (!slack_access_token) return
-
-  const slackConnection = await db.slack.findFirst({
-    where: { slackAccessToken: slack_access_token },
-    include: { connections: true },
-  })
-
-  if (!slackConnection) {
-    await db.slack.create({
+  const client = getClient()
+  const { data, errors } = await client.mutate({
+    mutation: SLACK_CONNECTION_MUTATION_ON_CONNECTION,
+    variables: {
       data: {
-        userId: user_id,
-        appId: app_id,
-        authedUserId: authed_user_id,
-        authedUserToken: authed_user_token,
-        slackAccessToken: slack_access_token,
-        botUserId: bot_user_id,
-        teamId: team_id,
-        teamName: team_name,
-        connections: {
-          create: { userId: user_id, type: 'Slack' },
-        },
-      },
-    })
-  }
+        app_id,
+        authed_user_id,
+        authed_user_token,
+        slack_access_token,
+        bot_user_id,
+        team_id,
+        team_name,
+        user_id
+      }
+    }
+  })
+  if (errors) console.error(errors)
 }
 
 export const getSlackConnection = async () => {
   const user = await currentUser()
+  const client = getClient()
   if (user) {
-    return await db.slack.findFirst({
-      where: { userId: user.id },
+    const { data, errors } = await client.query({
+      query: SLACK_CONNECTION_QUERY_CONNECTION,
+      variables: {
+        userId: user.id
+      }
     })
+    if (errors) console.error(errors)
+    if (data.getSlackConnections) return data.getSlackConnections
   }
   return null
 }
@@ -64,17 +66,15 @@ export async function listBotChannels(
       headers: { Authorization: `Bearer ${slackAccessToken}` },
     })
 
-    console.log(data)
-
     if (!data.ok) throw new Error(data.error)
 
     if (!data?.channels?.length) return []
-
-    return data.channels
-      .filter((ch: any) => ch.is_member)
+    const channels = data.channels.filter((ch: any) => ch.is_member)
       .map((ch: any) => {
         return { label: ch.name, value: ch.id }
       })
+
+    return channels
   } catch (error: any) {
     console.error('Error listing bot channels:', error.message)
     throw error
@@ -112,9 +112,10 @@ export const postMessageToSlack = async (
   selectedSlackChannels: Option[],
   content: string
 ): Promise<{ message: string }> => {
+  console.log(content)
   if (!content) return { message: 'Content is empty' }
+  console.log(selectedSlackChannels)
   if (!selectedSlackChannels?.length) return { message: 'Channel not selected' }
-
   try {
     selectedSlackChannels
       .map((channel) => channel?.value)

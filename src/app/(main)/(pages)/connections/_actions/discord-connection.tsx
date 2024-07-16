@@ -1,8 +1,11 @@
 'use server'
 
+import { CONNECTION_DISCORD_CREATE, CONNECTION_QUERY_DISCORD_URL } from '@/graphql/queries/discord'
+import { getClient } from '@/lib/data/graphql/client'
 import { db } from '@/lib/db'
 import { currentUser } from '@clerk/nextjs'
 import axios from 'axios'
+
 
 export const onDiscordConnect = async (
   channel_id: string,
@@ -13,104 +16,51 @@ export const onDiscordConnect = async (
   guild_name: string,
   guild_id: string
 ) => {
-  //check if webhook id params set
-  if (webhook_id) {
-    //check if webhook exists in database with userid
-    const webhook = await db.discordWebhook.findFirst({
-      where: {
-        userId: id,
-      },
-      include: {
-        connections: {
-          select: {
-            type: true,
-          },
-        },
-      },
-    })
 
-    //if webhook does not exist for this user
-    if (!webhook) {
-      //create new webhook
-      await db.discordWebhook.create({
-        data: {
-          userId: id,
-          webhookId: webhook_id,
-          channelId: channel_id!,
-          guildId: guild_id!,
-          name: webhook_name!,
-          url: webhook_url!,
-          guildName: guild_name!,
-          connections: {
-            create: {
-              userId: id,
-              type: 'Discord',
-            },
-          },
-        },
-      })
-    }
-
-    //if webhook exists return check for duplicate
-    if (webhook) {
-      //check if webhook exists for target channel id
-      const webhook_channel = await db.discordWebhook.findUnique({
-        where: {
-          channelId: channel_id,
-        },
-        include: {
-          connections: {
-            select: {
-              type: true,
-            },
-          },
-        },
-      })
-
-      //if no webhook for channel create new webhook
-      if (!webhook_channel) {
-        await db.discordWebhook.create({
-          data: {
-            userId: id,
-            webhookId: webhook_id,
-            channelId: channel_id!,
-            guildId: guild_id!,
-            name: webhook_name!,
-            url: webhook_url!,
-            guildName: guild_name!,
-            connections: {
-              create: {
-                userId: id,
-                type: 'Discord',
-              },
-            },
-          },
-        })
+  const { data, errors } = await getClient().mutate({
+    mutation: CONNECTION_DISCORD_CREATE,
+    variables: {
+      data: {
+        channel_id,
+        webhook_id,
+        webhook_name,
+        webhook_url,
+        id,
+        guild_name,
+        guild_id,
       }
     }
-  }
+  })
 }
 
 export const getDiscordConnectionUrl = async () => {
   const user = await currentUser()
   if (user) {
-    const webhook = await db.discordWebhook.findFirst({
-      where: {
+    const { data, errors } = await getClient().mutate({
+      mutation: CONNECTION_QUERY_DISCORD_URL,
+      variables: {
         userId: user.id,
-      },
-      select: {
-        url: true,
-        name: true,
-        guildName: true,
-      },
+      }
     })
-
-    return webhook
+    console.log(data)
+    if (data.getDiscordConnectionUrl.url) return data.getDiscordConnectionUrl
   }
 }
-
+export const getDiscordConnectionUrlWithUserId = async (user_id: string) => {
+  if (user_id) {
+    const { data, errors } = await getClient().mutate({
+      mutation: CONNECTION_QUERY_DISCORD_URL,
+      variables: {
+        userId: user_id,
+      }
+    })
+    console.log(data)
+    if (data.getDiscordConnectionUrl.url) return data.getDiscordConnectionUrl
+  }
+}
 export const postContentToWebHook = async (content: string, url: string) => {
   console.log(content)
+  console.log(url)
   if (content != '') {
     const posted = await axios.post(url, { content })
     if (posted) {

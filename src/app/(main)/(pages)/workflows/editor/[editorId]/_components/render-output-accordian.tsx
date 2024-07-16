@@ -7,9 +7,10 @@ import ContentBasedOnTitle from './content-based-on-title'
 type Props = {
   state: EditorState
   nodeConnection: ConnectionProviderProps
+  connects: void
 }
 
-const RenderOutputAccordion = ({ state, nodeConnection }: Props) => {
+const RenderOutputAccordion = ({ state, nodeConnection, connects }: Props) => {
   const {
     googleFile,
     setGoogleFile,
@@ -19,6 +20,7 @@ const RenderOutputAccordion = ({ state, nodeConnection }: Props) => {
   return (
     <ContentBasedOnTitle
       nodeConnection={nodeConnection}
+      connects={connects}
       newState={state}
       file={googleFile}
       setFile={setGoogleFile}

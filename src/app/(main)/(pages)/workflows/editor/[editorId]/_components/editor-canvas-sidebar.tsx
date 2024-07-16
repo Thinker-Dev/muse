@@ -4,7 +4,7 @@ import { useNodeConnections } from '@/providers/connections-provider'
 import { useEditor } from '@/providers/editor-provider'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Separator } from '@/components/ui/separator'
 import { CONNECTIONS, EditorCanvasDefaultCardTypes } from '@/lib/constant'
 import {
@@ -31,12 +31,15 @@ import { useFuzzieStore } from '@/store'
 
 type Props = {
   nodes: EditorNodeType[]
+  connections: void
 }
 
-const EditorCanvasSidebar = ({ nodes }: Props) => {
+const EditorCanvasSidebar = ({ nodes, connections }: Props) => {
   const { state } = useEditor()
   const { nodeConnection } = useNodeConnections()
   const { googleFile, setSlackChannels } = useFuzzieStore()
+  const [con, setCon] = useState(null)
+
   useEffect(() => {
     if (state) {
       onConnections(nodeConnection, state, googleFile)
@@ -51,6 +54,7 @@ const EditorCanvasSidebar = ({ nodes }: Props) => {
       )
     }
   }, [nodeConnection])
+
 
   return (
     <aside>
@@ -109,11 +113,12 @@ const EditorCanvasSidebar = ({ nodes }: Props) => {
                 Account
               </AccordionTrigger>
               <AccordionContent>
-                {CONNECTIONS.map((connection) => (
+                {CONNECTIONS.map((connect) => (
                   <RenderConnectionAccordion
-                    key={connection.title}
+                    key={connect.title}
                     state={state}
-                    connection={connection}
+                    connection={connect}
+                    connects={connections}
                   />
                 ))}
               </AccordionContent>
@@ -127,6 +132,7 @@ const EditorCanvasSidebar = ({ nodes }: Props) => {
               </AccordionTrigger>
               <RenderOutputAccordion
                 state={state}
+                connects={connections}
                 nodeConnection={nodeConnection}
               />
             </AccordionItem>

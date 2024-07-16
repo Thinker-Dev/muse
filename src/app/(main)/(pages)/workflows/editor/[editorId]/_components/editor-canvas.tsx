@@ -30,7 +30,9 @@ import FlowInstance from './flow-instance'
 import EditorCanvasSidebar from './editor-canvas-sidebar'
 import { onGetNodesEdges } from '../../../_actions/workflow-connections'
 
-type Props = {}
+type Props = {
+  connections: void
+}
 
 const initialNodes: EditorNodeType[] = []
 
@@ -66,7 +68,10 @@ const EditorCanvas = (props: Props) => {
   )
 
   const onConnect = useCallback(
-    (params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)),
+    (params: Edge | Connection) => {
+      setEdges((eds) => addEdge(params, eds))
+    },
+
     []
   )
 
@@ -267,7 +272,7 @@ const EditorCanvas = (props: Props) => {
             edges={edges}
             nodes={nodes}
           >
-            <EditorCanvasSidebar nodes={nodes} />
+            <EditorCanvasSidebar nodes={nodes} connections={props.connections} />
           </FlowInstance>
         )}
       </ResizablePanel>

@@ -12,7 +12,7 @@ const Workflows = async (props: Props) => {
       <section className="flex flex-col m-2">
         <MoreCredits />
         {workflows?.length ? (
-          workflows.map((flow) => (
+          workflows.map((flow: any) => (
             <Workflow
               key={flow.id}
               {...flow}

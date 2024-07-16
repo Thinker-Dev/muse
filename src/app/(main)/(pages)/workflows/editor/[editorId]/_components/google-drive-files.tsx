@@ -26,7 +26,8 @@ const GoogleDriveFiles = (props: Props) => {
 
   const onListener = async () => {
     const listener = await getGoogleListener()
-    if (listener?.googleResourceId !== null) {
+    console.log(listener)
+    if (listener) {
       setIsListening(true)
     }
   }
@@ -37,7 +38,7 @@ const GoogleDriveFiles = (props: Props) => {
 
   return (
     <div className="flex flex-col gap-3 pb-6">
-      {isListening ? (
+      {!isListening ? (
         <Card className="py-3">
           <CardContainer>
             <CardDescription>Listening...</CardDescription>

@@ -11,6 +11,7 @@ import {
   listBotChannels,
 } from '@/app/(main)/(pages)/connections/_actions/slack-connection'
 import { Option } from '@/components/ui/multiple-selector'
+import { content } from 'googleapis/build/src/apis/content'
 
 export const onDragStart = (
   event: any,
@@ -38,6 +39,7 @@ export const onDiscordContent = (
     ...prev,
     content: event.target.value,
   }))
+  console.log(nodeConnection)
 }
 
 export const onContentChange = (
@@ -45,6 +47,7 @@ export const onContentChange = (
   nodeType: string,
   event: React.ChangeEvent<HTMLInputElement>
 ) => {
+  console.log("node type ", nodeType)
   if (nodeType === 'Slack') {
     onSlackContent(nodeConnection, event)
   } else if (nodeType === 'Discord') {
@@ -104,18 +107,20 @@ export const onConnections = async (
   }
   if (editorState.editor.selectedNode.data.title == 'Notion') {
     const connection = await getNotionConnection()
+    console.log("this connection", connection)
     if (connection) {
+      console.log("here", connection.access_token, connection.database_id)
       nodeConnection.setNotionNode({
-        accessToken: connection.accessToken,
-        databaseId: connection.databaseId,
-        workspaceName: connection.workspaceName,
+        accessToken: connection.access_token,
+        databaseId: connection.database_id,
+        workspaceName: connection.workspace_name,
         content: {
           name: googleFile.name,
           kind: googleFile.kind,
           type: googleFile.mimeType,
         },
       })
-
+      console.log(nodeConnection.notionNode)
       if (nodeConnection.notionNode.databaseId !== '') {
         const response = await getNotionDatabase(
           nodeConnection.notionNode.databaseId,
@@ -128,14 +133,14 @@ export const onConnections = async (
     const connection = await getSlackConnection()
     if (connection) {
       nodeConnection.setSlackNode({
-        appId: connection.appId,
-        authedUserId: connection.authedUserId,
+        appId: connection.app_id,
+        authedUserId: connection.authed_user_id,
         authedUserToken: connection.authedUserToken,
-        slackAccessToken: connection.slackAccessToken,
-        botUserId: connection.botUserId,
-        teamId: connection.teamId,
-        teamName: connection.teamName,
-        userId: connection.userId,
+        slackAccessToken: connection.slack_access_token,
+        botUserId: connection.bot_user_id,
+        teamId: connection.team_id,
+        teamName: connection.team_name,
+        userId: connection.user_id,
         content: '',
       })
     }

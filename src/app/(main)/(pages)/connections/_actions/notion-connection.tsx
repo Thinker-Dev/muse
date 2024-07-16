@@ -1,5 +1,7 @@
 'use server'
 
+import { NOTION_CONNECTION_MUTATION_ON_CONNECTION, NOTION_CONNECTION_QUERY_CONNECTIONS } from '@/graphql/queries/notion'
+import { getClient } from '@/lib/data/graphql/client'
 import { db } from '@/lib/db'
 import { currentUser } from '@clerk/nextjs'
 import { Client } from '@notionhq/client'
@@ -13,54 +15,38 @@ export const onNotionConnect = async (
   id: string
 ) => {
   'use server'
-  if (access_token) {
-    //check if notion is connected
-    const notion_connected = await db.notion.findFirst({
-      where: {
-        accessToken: access_token,
-      },
-      include: {
-        connections: {
-          select: {
-            type: true,
-          },
-        },
-      },
-    })
-
-    if (!notion_connected) {
-      //create connection
-      await db.notion.create({
+  const client = getClient()
+  if (!access_token) return
+  const { data, errors } = await client.mutate(
+    {
+      mutation: NOTION_CONNECTION_MUTATION_ON_CONNECTION,
+      variables: {
         data: {
-          userId: id,
-          workspaceIcon: workspace_icon!,
-          accessToken: access_token,
-          workspaceId: workspace_id!,
-          workspaceName: workspace_name!,
-          databaseId: database_id,
-          connections: {
-            create: {
-              userId: id,
-              type: 'Notion',
-            },
-          },
-        },
-      })
+          workspace_id: workspace_id,
+          access_token: access_token,
+          workspace_icon: workspace_icon,
+          workspace_name: workspace_name,
+          database_id: database_id,
+          id: id
+        }
+      }
     }
-  }
+  )
+  if (data.onNotionConnect.message) return data.onNotionConnect.message;
 }
 export const getNotionConnection = async () => {
   const user = await currentUser()
-  if (user) {
-    const connection = await db.notion.findFirst({
-      where: {
-        userId: user.id,
-      },
-    })
-    if (connection) {
-      return connection
+  const client = getClient()
+  if (!user) return null;
+  const { data, errors } = await client.query(
+    {
+      query: NOTION_CONNECTION_QUERY_CONNECTIONS,
+      variables: {
+        userId: user.id
+      }
     }
-  }
+  )
+  if (data.getNotionConnections) return data.getNotionConnections;
 }
 
 export const getNotionDatabase = async (
@@ -70,6 +56,7 @@ export const getNotionDatabase = async (
   const notion = new Client({
     auth: accessToken,
   })
+
   const response = await notion.databases.retrieve({ database_id: databaseId })
   return response
 }
@@ -84,14 +71,16 @@ export const onCreateNewPageInDatabase = async (
   })
 
   console.log(databaseId)
+  console.log(content)
   const response = await notion.pages.create({
     parent: {
       type: 'database_id',
       database_id: databaseId,
     },
     properties: {
-      name: [
+      title: [
         {
+          type: 'text', // Specify the type explicitly
           text: {
             content: content,
           },
@@ -99,6 +88,7 @@ export const onCreateNewPageInDatabase = async (
       ],
     },
   })
+  console.log(response)
   if (response) {
     return response
   }

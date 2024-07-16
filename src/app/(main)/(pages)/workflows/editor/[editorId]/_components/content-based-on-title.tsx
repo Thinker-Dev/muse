@@ -38,12 +38,14 @@ type Props = {
   file: any
   setFile: (file: any) => void
   selectedSlackChannels: Option[]
+  connects: {} & any
   setSelectedSlackChannels: (value: Option[]) => void
 }
 
 const ContentBasedOnTitle = ({
   nodeConnection,
   newState,
+  connects,
   file,
   setFile,
   selectedSlackChannels,
@@ -71,21 +73,12 @@ const ContentBasedOnTitle = ({
   // @ts-ignore
   const nodeConnectionType: any = nodeConnection[nodeMapper[title]]
   if (!nodeConnectionType) return <p>Not connected</p>
-
+  console.log(nodeConnection)
+  console.log(nodeConnectionType["webhookURL"])
   const isConnected =
     title === 'Google Drive'
       ? !nodeConnection.isLoading
-      : !!nodeConnectionType[
-          `${
-            title === 'Slack'
-              ? 'slackAccessToken'
-              : title === 'Discord'
-              ? 'webhookURL'
-              : title === 'Notion'
-              ? 'accessToken'
-              : ''
-          }`
-        ]
+      : connects[title]
 
   if (!isConnected) return <p>Not connected</p>
 

@@ -49,8 +49,10 @@ const frameworks = [
 const RenderConnectionAccordion = ({
   connection,
   state,
+  connects
 }: {
-  connection: Connection
+  connection: Connection,
+  connects: void
   state: EditorState
 }) => {
   const {
@@ -87,7 +89,7 @@ const RenderConnectionAccordion = ({
             icon={image}
             description={description}
             type={title}
-            connected={{ [title]: isConnected }}
+            connected={connects}
           />
           {slackSpecial && isConnected && (
             <div className="p-6">

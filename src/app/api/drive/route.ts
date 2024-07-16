@@ -1,8 +1,7 @@
 import { google } from 'googleapis'
 import { auth, clerkClient } from '@clerk/nextjs'
 import { NextResponse } from 'next/server'
-import { v4 as uuidv4 } from 'uuid'
-import { db } from '@/lib/db'
+
 
 export async function GET() {
   const oauth2Client = new google.auth.OAuth2(
@@ -21,16 +20,18 @@ export async function GET() {
     'oauth_google'
   )
 
+
   const accessToken = clerkResponse[0].token
   oauth2Client.setCredentials({
     access_token: accessToken,
   })
 
+
   const drive = google.drive({
     version: 'v3',
     auth: oauth2Client,
   })
-  
+
   try {
     const response = await drive.files.list()
 
@@ -54,6 +55,7 @@ export async function GET() {
       )
     }
   } catch (error) {
+    console.log(error)
     return Response.json(
       {
         message: 'Something went wrong',

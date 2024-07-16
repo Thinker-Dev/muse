@@ -1,6 +1,8 @@
 'use server'
 
-import { db } from '@/lib/db'
+import { EDITOR_MUTATION_NODES, EDITOR_WORKFLOW_MUTATION_PUBLISH_FLOW } from '@/graphql/queries/automations'
+import { getClient } from '@/lib/data/graphql/client'
+
 
 export const onCreateNodesEdges = async (
   flowId: string,
@@ -8,31 +10,33 @@ export const onCreateNodesEdges = async (
   edges: string,
   flowPath: string
 ) => {
-  const flow = await db.workflows.update({
-    where: {
-      id: flowId,
-    },
-    data: {
-      nodes,
-      edges,
-      flowPath: flowPath,
-    },
+  const client = getClient()
+  const { data, errors } = await client.mutate({
+    mutation: EDITOR_MUTATION_NODES,
+    variables: {
+      data: {
+        flowId,
+        nodes,
+        edges,
+        flowPath
+      }
+    }
   })
-
-  if (flow) return { message: 'flow saved' }
+  if (errors) return "could not create nodes"
+  if (data.createNodesEdges) return { message: "flow saved" }
 }
 
 export const onFlowPublish = async (workflowId: string, state: boolean) => {
-  console.log(state)
-  const published = await db.workflows.update({
-    where: {
-      id: workflowId,
-    },
-    data: {
-      publish: state,
-    },
+  const client = getClient()
+  console.log(workflowId)
+  const { data, errors } = await client.mutate({
+    mutation: EDITOR_WORKFLOW_MUTATION_PUBLISH_FLOW,
+    variables: {
+      automationId: workflowId,
+      state: state
+    }
   })
 
-  if (published.publish) return 'Workflow published'
-  return 'Workflow unpublished'
+  if (errors) return 'Workflow unpublished'
+  return 'Workflow published'
 }

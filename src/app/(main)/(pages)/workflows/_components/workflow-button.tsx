@@ -16,8 +16,8 @@ const WorkflowButton = (props: Props) => {
   const handleClick = () => {
     setOpen(
       <CustomModal
-        title="Create a Workflow Automation"
-        subheading="Workflows are a powerfull that help you automate tasks."
+        title="Create a Automation"
+        subheading="Start Automating your tasks."
       >
         <Workflowform />
       </CustomModal>
@@ -29,11 +29,11 @@ const WorkflowButton = (props: Props) => {
       size={'icon'}
       {...(credits !== '0'
         ? {
-            onClick: handleClick,
-          }
+          onClick: handleClick,
+        }
         : {
-            disabled: true,
-          })}
+          disabled: true,
+        })}
     >
       <Plus />
     </Button>

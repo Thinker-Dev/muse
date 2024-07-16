@@ -56,7 +56,6 @@ const Connections = async (props: Props) => {
   if (!user) return null
 
   const onUserConnections = async () => {
-    console.log(database_id)
     await onDiscordConnect(
       channel_id!,
       webhook_id!,
@@ -89,9 +88,9 @@ const Connections = async (props: Props) => {
     const connections: any = {}
 
     const user_info = await getUserData(user.id)
-
+    console.log(user_info)
     //get user info with all connections
-    user_info?.connections.map((connection) => {
+    user_info?.connections.map((connection: any) => {
       connections[connection.type] = true
       return (connections[connection.type] = true)
     })

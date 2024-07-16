@@ -53,10 +53,10 @@ const ConnectionCard = ({
               title == 'Discord'
                 ? process.env.NEXT_PUBLIC_DISCORD_REDIRECT!
                 : title == 'Notion'
-                ? process.env.NEXT_PUBLIC_NOTION_AUTH_URL!
-                : title == 'Slack'
-                ? process.env.NEXT_PUBLIC_SLACK_REDIRECT!
-                : '#'
+                  ? process.env.NEXT_PUBLIC_NOTION_AUTH_URL!
+                  : title == 'Slack'
+                    ? process.env.NEXT_PUBLIC_SLACK_REDIRECT!
+                    : '#'
             }
             className=" rounded-lg bg-primary p-2 font-bold text-primary-foreground"
           >
