@@ -104,3 +104,9 @@ export type Feature = {
   title: string;
   paragraph: string;
 };
+
+export type SideMenu = {
+  title: string;
+  path: string;
+  Component: ({ active }: { active: boolean }) => JSX.Element;
+};

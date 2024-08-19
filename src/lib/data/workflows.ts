@@ -1,6 +1,4 @@
-import { Workflows } from "../types";
-
-export const workflowData: Workflows[] = [
+export const workflowData = [
   {
     name: "First worflow",
     description:
