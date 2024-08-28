@@ -5,7 +5,7 @@ export const { getClient } = registerApolloClient(() => {
   return new ApolloClient({
     cache: new InMemoryCache(),
     link: new HttpLink({
-      uri: "http://localhost:4000",
+      uri: "https://muse-backend-rqm8.onrender.com",
     }),
   });
 });
