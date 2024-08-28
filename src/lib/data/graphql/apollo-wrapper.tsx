@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  ApolloClient,
-  ApolloLink,
-  HttpLink,
-} from "@apollo/client";
+import { ApolloLink, HttpLink } from "@apollo/client";
 import {
   ApolloNextAppProvider,
   NextSSRApolloClient,
@@ -22,11 +18,11 @@ function makeClient() {
     link:
       typeof window === "undefined"
         ? ApolloLink.from([
-          new SSRMultipartLink({
-            stripDefer: true,
-          }),
-          httpLink,
-        ])
+            new SSRMultipartLink({
+              stripDefer: true,
+            }),
+            httpLink,
+          ])
         : httpLink,
   });
 }

@@ -1,8 +1,3 @@
-import { ColabIcon } from "@/components/icons/colab";
-import { DiscordIcon } from "@/components/icons/discord";
-import { DriveIcon } from "@/components/icons/drive";
-import { SlackIcon } from "@/components/icons/slack";
-
 export const EditorCanvasDefaultCardTypes = {
   Email: { description: "Send and email to a user", type: "Action" },
   Condition: {
